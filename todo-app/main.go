@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,6 +28,9 @@ type UpdateTodoRequest struct {
 var collection *mongo.Collection
 
 func main() {
+	// Create a server
+	app := fiber.New()
+
 	// Load Environment Variables
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -37,6 +41,14 @@ func main() {
 		PORT = "8000"
 	}
 	MONGO_URI := os.Getenv("MONGO_URI")
+
+	// Confgure CORS Middleware
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins:     "*",
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH",
+		AllowHeaders:     "Origin, Content-Type, Accept",
+	}))
 
 	// Connect to MongoDB
 	clientOptions := options.Client().ApplyURI(MONGO_URI)
@@ -54,9 +66,6 @@ func main() {
 
 	// Setup collection
 	collection = client.Database("go-todo-app").Collection("todos")
-
-	// Create a server
-	app := fiber.New()
 
 	// Setup Routes
 	app.Get("/api/v1/todos", getTodos)
