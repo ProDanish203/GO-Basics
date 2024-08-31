@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -28,6 +29,7 @@ type UpdateTodoRequest struct {
 var collection *mongo.Collection
 
 func main() {
+	fmt.Println("Hello, Server!")
 	// Create a server
 	app := fiber.New()
 
@@ -45,7 +47,7 @@ func main() {
 	// Confgure CORS Middleware
 	app.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     "*",
+		AllowOrigins:     "http://localhost:3000",
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH",
 		AllowHeaders:     "Origin, Content-Type, Accept",
 	}))
@@ -68,6 +70,9 @@ func main() {
 	collection = client.Database("go-todo-app").Collection("todos")
 
 	// Setup Routes
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Status(200).JSON(fiber.Map{"message": "Hello, Server!"})
+	})
 	app.Get("/api/v1/todos", getTodos)
 	app.Post("/api/v1/todos", createTodo)
 	app.Patch("/api/v1/todos/:id", updateTodo)
